@@ -1,0 +1,41 @@
+{
+  "users": [
+    {
+      "id": "1764079127047",
+      "email": "***RIMOSSO***",
+      "password": "***RIMOSSO***",
+      "firstName": "Davide",
+      "lastName": "Ritrovato",
+      "role": "student",
+      "classes": [
+        "1764079171827"
+      ]
+    },
+    {
+      "id": "1764079158981",
+      "email": "***RIMOSSO***",
+      "password": "***RIMOSSO***",
+      "firstName": "Insegnante",
+      "lastName": "Demo",
+      "role": "teacher",
+      "classes": [
+        "1764079171827"
+      ]
+    }
+  ],
+  "classes": [
+    {
+      "id": "1764079171827",
+      "name": "Ciao prova",
+      "code": "3X4S1A",
+      "teacherId": "1764079158981",
+      "students": [
+        "1764079127047"
+      ],
+      "books": [],
+      "tasks": []
+    }
+  ],
+  "activities": [],
+  "updatedAt": null
+}
