@@ -1,0 +1,38 @@
+{
+  "name": "booklab",
+  "version": "1.0.0",
+  "description": "Piattaforma educativa con backend Express e database JSON",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TUO_USERNAME/booklab.git"
+  },
+  "keywords": [
+    "education",
+    "platform",
+    "students",
+    "teachers",
+    "booklab"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.19.2",
+    "mongoose": "^8.0.0",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
+
