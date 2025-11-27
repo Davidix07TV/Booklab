@@ -957,9 +957,6 @@
                 if (Array.isArray(data.classes)) {
                     localStorage.setItem('classes', JSON.stringify(data.classes));
                     console.log('Classi sincronizzate dal server:', data.classes.length, 'classi');
-                    if (data.classes.length > 0) {
-                        console.log('Codici classi disponibili:', data.classes.map(c => (c.code || '').toString().trim().toUpperCase()));
-                    }
                 }
                 lastSnapshotFetched = now;
                 refreshCurrentUserFromStorage();
@@ -2356,61 +2353,67 @@
         }
 
         async function leaveClass() {
-            if (!currentUser || !currentUser.classes || currentUser.classes.length === 0) {
-                showAlert('Non sei iscritto a nessuna classe', 'error');
-                return;
-            }
-
-            if (!confirm('Sei sicuro di voler lasciare questa classe? Tutti i tuoi progressi (letture, pagine lette) verranno rimossi.')) {
-                return;
-            }
-
-            const classId = currentUser.classes[0];
-            await syncFromServer(true);
-            const classes = getClasses();
-            const classObj = classes.find(c => c.id === classId);
-
-            if (classObj) {
-                // Rimuovi lo studente dalla lista della classe
-                if (classObj.students) {
-                    classObj.students = classObj.students.filter(id => id !== currentUser.id);
+            console.log('leaveClass invoked', { currentUser });
+            try {
+                if (!currentUser || !currentUser.classes || currentUser.classes.length === 0) {
+                    showAlert('Non sei iscritto a nessuna classe', 'error');
+                    return;
                 }
-                saveClasses(classes);
-                
-                // Rimuovi tutte le attività associate a questa classe per questo utente
-                try {
-                    const activities = JSON.parse(localStorage.getItem('activities') || '[]');
-                    const filteredActivities = activities.filter(a => 
-                        !(a.userId === currentUser.id && a.classId === classId)
-                    );
-                    localStorage.setItem('activities', JSON.stringify(filteredActivities));
-                } catch (error) {
-                    console.error('Errore durante la rimozione delle attività:', error);
+
+                if (!confirm('Sei sicuro di voler lasciare questa classe? Tutti i tuoi progressi (letture, pagine lette) verranno rimossi.')) {
+                    return;
                 }
-                
-                // Rimuovi gli stati di lettura per i libri di questa classe
-                try {
-                    const readingStates = JSON.parse(localStorage.getItem('readingStates') || '{}');
-                    if (classObj.books && classObj.books.length > 0) {
-                        classObj.books.forEach(book => {
-                            const key = `${currentUser.id}_${book.id}`;
-                            if (readingStates[key]) {
-                                delete readingStates[key];
-                            }
-                        });
-                        localStorage.setItem('readingStates', JSON.stringify(readingStates));
+
+                const classId = currentUser.classes[0];
+                await syncFromServer(true);
+                const classes = getClasses();
+                const classObj = classes.find(c => c.id === classId);
+
+                if (classObj) {
+                    // Rimuovi lo studente dalla lista della classe
+                    if (classObj.students) {
+                        classObj.students = classObj.students.filter(id => id !== currentUser.id);
                     }
-                } catch (error) {
-                    console.error('Errore durante la rimozione degli stati di lettura:', error);
+                    saveClasses(classes);
+                    
+                    // Rimuovi tutte le attività associate a questa classe per questo utente
+                    try {
+                        const activities = JSON.parse(localStorage.getItem('activities') || '[]');
+                        const filteredActivities = activities.filter(a => 
+                            !(a.userId === currentUser.id && a.classId === classId)
+                        );
+                        localStorage.setItem('activities', JSON.stringify(filteredActivities));
+                    } catch (error) {
+                        console.error('Errore durante la rimozione delle attività:', error);
+                    }
+                    
+                    // Rimuovi gli stati di lettura per i libri di questa classe
+                    try {
+                        const readingStates = JSON.parse(localStorage.getItem('readingStates') || '{}');
+                        if (classObj.books && classObj.books.length > 0) {
+                            classObj.books.forEach(book => {
+                                const key = `${currentUser.id}_${book.id}`;
+                                if (readingStates[key]) {
+                                    delete readingStates[key];
+                                }
+                            });
+                            localStorage.setItem('readingStates', JSON.stringify(readingStates));
+                        }
+                    } catch (error) {
+                        console.error('Errore durante la rimozione degli stati di lettura:', error);
+                    }
                 }
+
+                // Rimuovi la classe dall'utente
+                currentUser.classes = [];
+                updateUser(currentUser);
+
+                await loadStudentData();
+                showAlert('Hai lasciato la classe con successo. Tutti i progressi sono stati rimossi.', 'success');
+            } catch (err) {
+                console.error('Errore in leaveClass:', err);
+                alert('Errore durante l\'operazione: ' + (err && err.message ? err.message : err));
             }
-
-            // Rimuovi la classe dall'utente
-            currentUser.classes = [];
-            updateUser(currentUser);
-
-            await loadStudentData();
-            showAlert('Hai lasciato la classe con successo. Tutti i progressi sono stati rimossi.', 'success');
         }
 
         async function loadStudentData() {
